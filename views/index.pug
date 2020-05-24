@@ -1,0 +1,57 @@
+extends layout
+block content
+  h1= title
+
+  if member.id
+    h3 Welcome #{member.name}
+    form(method='GET' action='/members/logout')
+      input#userNameSubmit(type='submit', value='Log Out')
+    form(method='GET' action='/rooms/create')
+      input#roomName(type='text' name='name' placeholder='roomName')
+      input#addRoom(type='submit', value='Add Room')
+  else
+    p Please Enter a User Name:
+    form(method='GET' action='/members/create')
+      input#userName(type='text', name='name' placeholder='username')
+      input#userNameSubmit(type='submit', value='Submit')
+      br
+  table#roomsTable
+    thead
+      tr
+        th(data-field='name') Name
+        th(data-field='members.length') Count
+        th(data-field='action') Action
+  script.
+    const socket = io.connect('http://localhost:4000');
+
+    socket.on('news', (data)=>{
+      socket.emit('my other event', {my:'data'});
+    });
+
+    refreshRooms();
+
+    function refreshRooms(){
+        axios.get('/rooms').then(res=>{
+            res.data.forEach((value,index)=>{
+              value["action"] = "<button data-roomid='"+value.id+"' onclick='joinRoom(this)'>Join Room</button>";
+            });
+          $('#roomsTable').bootstrapTable({
+            data: res.data
+          });
+        });
+    }
+    
+    function addRoom(name){
+      axios.get(`/rooms/create?name=${name}`).then(res=>{
+        refreshRooms();
+      });
+    }
+
+    function joinRoom(sender){
+      axios.get(`rooms/addToRoom//${sender.dataset.roomid}`)
+      .then(res=>{console.log('we good');console.log(res.data)})
+      .catch(e=>{ console.log('we not good');console.log(e)});
+    }
+
+
+
