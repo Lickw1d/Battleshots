@@ -8,7 +8,7 @@ http.listen(4000);
 const rooms = [];
 
 io.on('connection', (socket)=>{
-    console.log('we have a connection');
+
    socket.emit('news', {hello: 'world'});
    socket.on('my other event', (data)=>{
        console.log(data);

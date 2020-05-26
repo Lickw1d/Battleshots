@@ -28,18 +28,25 @@ router.get('/defaultRoom', async (req,res,next)=>{
     res.send(defaultRoom)
 });
 
-router.get('/addToRoom/:memberId/:roomId', async(req,res,next)=>{
-    
-    var memberId = req.params.memberId || req.cookies.memberId;
+router.get('/addToRoom/:roomId', async(req,res,next)=>{
+    var memberId = req.cookies.memberId;   
+    await moveRoom(memberId,req,res);
+})
+router.get('/addToRoom/:roomId/:memberId', async(req,res,next)=>{
+    var memberId = req.params.memberId;   
+    await moveRoom(memberId,req,res);
+});
+
+async function moveRoom(memberId, req,res){
     if(!memberId || memberId === 'undefined')
     {
         res.status(403).send('Member must be provided');
-        return 
+        return; 
     }
     var member = (await axios.get(`http://localhost:4000/members/?memberId=${memberId}`)).data;
 
     if(!member.id){
-        res.status('404').send('member not found');
+        res.status(400);
         return;
     }
 
@@ -49,28 +56,34 @@ router.get('/addToRoom/:memberId/:roomId', async(req,res,next)=>{
 
         if(!targetRoom)
         {
-            res.status('404').send('Target Room Not Found');
+            res.status('400').send('Target Room Not Found');
             return;
         }
 
         if(targetRoom != defaultRoom && targetRoom.members.length >= roomMax)
         {
-           res.status('403').send(`Room full. Capacity: ${roomMax}`);
+           res.status('400').send(`Room full. Capacity: ${roomMax}`);
            return;
         }
 
         if(currentRoom){
-            _.remove(currentRoom.members, memberId=>{memberId === member.id});
+            console.log('current room before');
+            console.log(currentRoom.members);
+
+            currentRoom.members.splice(currentRoom.members.indexOf(member.id),1);
             member.currentRoom = null;
-            console.log(`removed member ${member.id} from room ${room}`);
+            console.log(`removed member ${member.id} from room ${currentRoom.name}`);
+
+            console.log('current room after');
+            console.log(currentRoom.members);
         }
 
         targetRoom.members.push(member.id);
         member.currentRoom = targetRoom.id;
+        console.log(`added member ${member.id} to room ${member.currentRoom}`)
         await axios.post('http://localhost:4000/members/update', member)
         res.status(200).send(targetRoom);
-});
-
+}
 
 function createRoom(name, owner){
     return {

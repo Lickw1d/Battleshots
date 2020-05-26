@@ -44,6 +44,7 @@ router.get('/create', async (req, res, next)=>{
 
 router.get('/logout', async (req,res,next)=>{
     res.cookie('memberId')
+    console.log(res.cookie.memberId)
     res.redirect(301,'/');
   })
 
@@ -79,7 +80,7 @@ const createMember = async (name)=>{
 
    var defaultRoom = (await axios.get('http://localhost:4000/rooms/defaultRoom')).data;
 
-   await axios.get(`http://localhost:4000/rooms/addToRoom/${newMember.id}/${defaultRoom.id}`);
+   await axios.get(`http://localhost:4000/rooms/addToRoom/${defaultRoom.id}/${newMember.id}`);
    return newMember
 }
 module.exports = router;
