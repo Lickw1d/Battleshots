@@ -9,8 +9,9 @@ const rooms = [];
 
 io.on('connection', (socket)=>{
 
-   socket.emit('news', {hello: 'world'});
-   socket.on('my other event', (data)=>{
+   socket.on('newMessage', data=>{
+       console.log('new Message Received');
        console.log(data);
+       io.emit(data.member.currentRoom, `${data.member.name}: `+data.message);
    })
 })

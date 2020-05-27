@@ -42,9 +42,14 @@ router.get('/create', async (req, res, next)=>{
     }
 });
 
+router.get('/getCurrentMember', (req,res,next)=>{
+    console.log(req.cookies);
+    var memberData = _.find(members, {id : req.cookies.memberId});
+    res.status(200).send(memberData);
+})
+
 router.get('/logout', async (req,res,next)=>{
     res.cookie('memberId')
-    console.log(res.cookie.memberId)
     res.redirect(301,'/');
   })
 

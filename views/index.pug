@@ -1,10 +1,10 @@
 extends layout
 block content
+  script(src='/js/index.js')
   h1= title
 
   if member.id
-    h3 Welcome #{member.name} Current Room:&nbsp;
-      span#currentRoom #{member.currentRoom}
+    h3 Welcome #{member.name}
     form(method='GET' action='/members/logout')
       input#userNameSubmit(type='submit', value='Log Out')
     form(method='GET' action='/rooms/create')
@@ -25,54 +25,10 @@ block content
   div#roomChat
     h4 Room Chat:
       span#chatRoomName #{member.currentRoom}
-  script.
-    const socket = io.connect('http://localhost:4000');
-    const roomTable = $('#roomTable');
-    const roomMessages = [];
+    div#messages(style='max-height:300px')
+    input(type='text')#messageEntryBox
+    button#sendMessage(onclick='sendMessage()') Send
 
-
-    socket.on('news', (data)=>{
-      socket.emit('my other event', {my:'data'});
-    });
-
-    bindr.addBinding('chatRoomName', val=>{document.getElementById('chatRoomName').innerHTML=val});
-    bindr.addBinding('currentRoom', (val)=>{document.getElementById('currentRoom').innerHTML=val});
-   
-    refreshRoomsTable();
-    function refreshRoomsTable(){
-        axios.get('/rooms').then(res=>{
-            res.data.forEach((value,index)=>{
-              value["action"] = "<button data-roomid='"+value.id+"' onclick='joinRoom(this)'>Join Room</button>";
-            });
-
-            //if table isn't bound, bind. if table is bound, load. 
-            if(!Array.isArray(roomTable.bootstrapTable('getData'))){
-              roomTable.bootstrapTable({
-              data: res.data
-              });
-            }
-            else{
-              roomTable.bootstrapTable('load', res.data);
-            }
-         
-        });
-    }
-    
-    function createRoom(name){
-      axios.get(`/rooms/create?name=${name}`).then(res=>{
-        refreshRoomsTable();
-      });
-    }
-
-    function joinRoom(sender){
-      axios.get(`rooms/addToRoom/${sender.dataset.roomid}`)
-      .then(res=>{
-        bindr.currentRoom.bind(res.data.id);
-        bindr.chatRoomName.bind(res.data.id);
-        refreshRoomsTable();
-        })
-      .catch(e=>{console.log(e)});
-    }
 
 
 
