@@ -5,8 +5,7 @@ const axios = require('axios');
 /* GET home page. */
 router.get('/', async (req, res, next)=>{
   var member;
-
-  axios.get(`http://localhost:4000/members/?memberId=${req.cookies.memberId}`)
+  axios.get(`http://localhost:${process.env.PORT || 4000}/members/?memberId=${req.cookies.memberId}`)
   .then(res=>{
     member = res.data;
   })

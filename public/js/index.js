@@ -1,4 +1,4 @@
-const socket = io.connect('http://localhost:4000');
+const socket = io.connect('http://localhost:5858');
 const roomMessages = [];
 
 
@@ -11,11 +11,11 @@ var roomConnection=null;
 
 addBindings();
 getCurrentMemberData()
-.then(_=>switchSocketListener(memberData.currentRoom))
+.then(_=>switchSocketListener(roomConnection))
 
 function refreshRoomsTable(roomTable){
 
-    axios.get('/rooms').then(res=>{
+    axios.get('/rooms/').then(res=>{
         res.data.forEach((value,index)=>{
           value["action"] = "<button data-roomid='"+value.id+"' onclick='joinRoom(this)'>Join Room</button>";
         });
@@ -36,10 +36,7 @@ function refreshRoomsTable(roomTable){
 function addBindings(){
 
     bindr.addBinding('chatRoomName', val=>{document.getElementById('chatRoomName').innerHTML=val}); 
-    bindr.addBinding('roomMessages', val=>{ 
-        document.getElementById('messages').innerHTML = 
-        document.getElementById('messages').innerHTML + '<p>'+val[val.length-1]+'</p>'
-    });
+    bindr.addBinding('roomMessages',bind_newMessages);
 }
 
 function getCurrentMemberData()
@@ -58,9 +55,8 @@ function joinRoom(sender){
 
     refreshRoomsTable($('#roomTable'));
 
-        getCurrentMemberData().then(res=>{
-            switchSocketListener(memberData.currentRoom);
-        })
+    getCurrentMemberData()
+    .then(_=>switchSocketListener(memberData.currentRoom))
     })
   .catch(e=>{console.log(e)});
 }
@@ -80,4 +76,9 @@ function switchSocketListener(newRoomId){
     bindr.roomMessages.bind(roomMessages);
   })
   
+}
+
+function bind_newMessages(val){
+    document.getElementById('messages').innerHTML = 
+    document.getElementById('messages').innerHTML + '<p>'+val[val.length-1]+'</p>'
 }

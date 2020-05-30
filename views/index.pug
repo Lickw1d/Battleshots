@@ -3,7 +3,7 @@ block content
   script(src='/js/index.js')
   h1= title
 
-  if member.id
+  if member
     h3 Welcome #{member.name}
     form(method='GET' action='/members/logout')
       input#userNameSubmit(type='submit', value='Log Out')
@@ -22,12 +22,13 @@ block content
         th(data-field='name') Name
         th(data-field='members.length') Count
         th(data-field='action') Action
-  div#roomChat
-    h4 Room Chat:
-      span#chatRoomName #{member.currentRoom}
-    div#messages(style='max-height:300px')
-    input(type='text')#messageEntryBox
-    button#sendMessage(onclick='sendMessage()') Send
+  if member
+    div#roomChat
+      h4 Room Chat:
+        span#chatRoomName #{member.currentRoom}
+      div#messages(style='max-height:300px')
+      input(type='text')#messageEntryBox
+      button#sendMessage(onclick='sendMessage()') Send
 
 
 

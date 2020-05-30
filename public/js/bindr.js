@@ -6,8 +6,8 @@ const bindr = {
 
             bindr.bindVars.push(bVariableName);
 
-            bindr[bVariableName] = {val:null}
-
+            bindr[bVariableName] = {}
+            
             bindr[bVariableName].bind = (val) => {
                 bindr[bVariableName].val=val;
                 bFunction(val)

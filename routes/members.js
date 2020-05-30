@@ -3,13 +3,14 @@ const router = express.Router();
 const _ = require('lodash');
 const {v4: uuidv4} = require('uuid');
 const axios = require('axios');
-const members = [];
+
+const memberRepository = require('./../repositories/memberRepository')
 
 
 router.get('/', (req,res,next)=>{
     console.log(`member id searched for:${req.query.memberId}`)
     if(req.query.memberId){
-        var member = _.find(members,{id:req.query.memberId})
+        var member = memberRepository.get(req.query.memberId)
         if(member){
             res.send(member)
         }
@@ -18,7 +19,7 @@ router.get('/', (req,res,next)=>{
         }
     }
     else{
-        res.send(members);
+        res.send(memberRepository.getAll());
     }
 });
 
@@ -30,13 +31,13 @@ router.get('/create', async (req, res, next)=>{
         res.send('No name provided');
     }
 
-    if(_.find(members,{name:name}))
+    if(memberRepository.get({name:name}))
     {
         res.status(409);
         res.send('Name already taken')
     }
     else{
-        var member = await createMember(name);
+        var member = await memberRepository.create(name);
         res.cookie('memberId',member.id);
         res.redirect(301,'back');
     }
@@ -44,8 +45,12 @@ router.get('/create', async (req, res, next)=>{
 
 router.get('/getCurrentMember', (req,res,next)=>{
     console.log(req.cookies);
-    var memberData = _.find(members, {id : req.cookies.memberId});
-    res.status(200).send(memberData);
+    if(req.cookies.memberId){
+        res.status(200).send(memberRepository.getById({id : req.cookies.memberId}));
+        return;
+    }
+
+    res.status(200).send(null);
 })
 
 router.get('/logout', async (req,res,next)=>{
@@ -54,38 +59,11 @@ router.get('/logout', async (req,res,next)=>{
   })
 
 router.post('/update', async (req,res,next)=>{
-    if(req.body.id){
-        var memberIndex = _.findIndex(members, {id:req.body.id});
-
-        if(memberIndex === -1){
-            console.log('member not found');
-            res.status(404,'Member Not Found');
-            return;
-        }
-        
-        console.log('member found');
-        members[memberIndex] = req.body;
+    if(memberRepository.update(request.body)){
         return res.status(200).send();
     }
+    res.status(400).send();
     
 })
 
-
-//functions
-const createMember = async (name)=>{
-   var defaultRoom; 
-   var newMember  =
-   {
-    id: uuidv4(),
-    name: name,
-    currentRoom: null
-    }
-
-    members.push(newMember);
-
-   var defaultRoom = (await axios.get('http://localhost:4000/rooms/defaultRoom')).data;
-
-   await axios.get(`http://localhost:4000/rooms/addToRoom/${defaultRoom.id}/${newMember.id}`);
-   return newMember
-}
 module.exports = router;
