@@ -4,8 +4,11 @@ const memberRepository = {};
 const members = [];
 
 memberRepository.get = (findCriteria) => _.find(members, findCriteria);
+
 memberRepository.getById = (id)=>_.find(members, {id:id});
+
 memberRepository.getAll = ()=>members;
+
 memberRepository.create = (name)=>{
     var member ={
      id: uuidv4(),
@@ -16,7 +19,7 @@ memberRepository.create = (name)=>{
     return member;
  }
 
- memberRepository.upate = (member)=>
+ memberRepository.update = (member)=>
  {
     if(member.id){
 

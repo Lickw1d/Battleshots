@@ -1,4 +1,6 @@
 const {v4: uuidv4} = require('uuid');
+const _ = require('lodash');
+
 const roomRepository = {};
 const rooms = [];
 const memberRoomMap = {};
@@ -31,19 +33,19 @@ roomRepository.updateName = (id,newName)=>{
         rooms[id].name=newName;
         return true;
     }
-
     return false;
 };
 
 roomRepository.addMemberToRoom = (roomId,member)=>{
 
-    if(rooms[roomId] && rooms[roomId].members.length<rooms[roomId].roomMax){
+    roomRepository.removeMemberFromRoom(member.id);
+    var room = roomRepository.getById(roomId);
 
-        rooms[roomId].members.push(member);
-        memberRoomMap[member.id]=rooms[roomId];
-        return memberRoomMap[member];
+    if(room && room.members.length<room.roomMax){
+        room.members.push(member);
+        memberRoomMap[member.id]=room;
+        return true;
     }
-
     return false
 };
 

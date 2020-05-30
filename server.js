@@ -1,7 +1,8 @@
-const events = require ('events')
-const app = require('./app')
-const http= require('http').createServer(app)
-const io = require('socket.io')(http)
+const events = require ('events');
+const app = require('./app');
+const http= require('http').createServer(app);
+const io = require('socket.io')(http);
+const roomRepository = require('./repositories/roomRepository');
 
 http.listen(process.env.PORT || 4000);
 

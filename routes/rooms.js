@@ -18,14 +18,15 @@ router.get('/create', async (req, res, next)=>{
         res.status(201);
         res.redirect('back');
 });
+
 router.get('/', async (req,res,next)=>{
   var rooms = roomRepository.getAll();
   res.status(200).send(rooms);
 });
 
-router.get('/:roomId', async (req,res,next)=>{
+router.get('/', async (req,res,next)=>{
 
-    if(!roomId){
+    if(!req.query.roomId){
         res.status(200).send(roomRepository.getAll());
         return;
     }
@@ -38,14 +39,20 @@ router.get('/defaultRoom', async (req,res,next)=>{
     res.send(defaultRoom)
 });
 
-router.get('/addToRoom/:roomId', async(req,res,next)=>{
-    var memberId = req.cookies.memberId;   
-    await moveRoom(memberId,req,res);
-})
 router.get('/addToRoom/:roomId/:memberId', async(req,res,next)=>{
-    var memberId = req.params.memberId;   
-    await moveRoom(memberId,req,res);
-});
+    let memberId = (req.params.memberId==='undefined'? undefined : req.params.memberId ) || req.cookies.memberId;
+    let member = memberRepository.getById(memberId);
+
+    if(member && roomRepository.addMemberToRoom(req.params.roomId,member))
+    {
+        res.send(roomRepository.getMemberRoom(member.id))
+    }
+    else
+    {
+        res.status(400).send("could not find member or room");
+    }
+
+})
 
 
 module.exports = router;

@@ -4,8 +4,8 @@ const _ = require('lodash');
 const {v4: uuidv4} = require('uuid');
 const axios = require('axios');
 
-const memberRepository = require('./../repositories/memberRepository')
-
+const memberRepository = require('./../repositories/memberRepository');
+const roomRepository = require('./../repositories/roomRepository');
 
 router.get('/', (req,res,next)=>{
     console.log(`member id searched for:${req.query.memberId}`)
@@ -23,7 +23,7 @@ router.get('/', (req,res,next)=>{
     }
 });
 
-router.get('/create', async (req, res, next)=>{
+router.get('/create', (req, res, next)=>{
 
     var name = req.query.name;
     if(!name || name.length === 0){
@@ -37,8 +37,13 @@ router.get('/create', async (req, res, next)=>{
         res.send('Name already taken')
     }
     else{
-        var member = await memberRepository.create(name);
-        res.cookie('memberId',member.id);
+        var member = memberRepository.create(name);
+
+        if(member)
+        {
+            res.cookie('memberId',member.id);
+            roomRepository.addMemberToRoom(roomRepository.get({name:'default'}).id,member)
+        }
         res.redirect(301,'back');
     }
 });

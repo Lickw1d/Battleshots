@@ -47,7 +47,7 @@ function getCurrentMemberData()
 }
 
 function joinRoom(sender){
-  axios.get(`rooms/addToRoom/${sender.dataset.roomid}`)
+  axios.get(`rooms/addToRoom/${sender.dataset.roomid}/undefined`)
   .then(res=>{
 
     roomId = res.data.id;
